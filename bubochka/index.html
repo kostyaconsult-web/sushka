@@ -1056,7 +1056,7 @@ html{scroll-behavior:smooth}
       else if(g>=1000)q=fmt(Math.round(g/100)/10)+" кг";
       else q=(Math.ceil(g/10)*10)+" г";
       return [a.name,q];
-    });
+    }).sort(function(x,y){return x[0].localeCompare(y[0],"ru")});
   }
   function renderShop(){
     sl.innerHTML="";

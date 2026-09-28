@@ -202,7 +202,7 @@ html{scroll-behavior:smooth}
 .wstat{font-size:13px;color:var(--muted);margin-top:2px}
 .wstat b{color:var(--ink);font-family:var(--mono)}
 #wChart{width:100%;height:auto;display:block}
-.wform{display:grid;grid-template-columns:1fr 1fr auto;gap:8px;align-items:end}
+.wform{display:grid;grid-template-columns:1fr auto;gap:8px;align-items:end}
 .wform label{display:block;font-size:12px;font-weight:600;color:var(--muted);margin-bottom:3px}
 .wform input{width:100%;font:500 15px var(--sans);color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:8px 10px;min-width:0}
 .wform input:focus{outline:2px solid var(--accent);outline-offset:0;border-color:transparent}
@@ -211,7 +211,6 @@ html{scroll-behavior:smooth}
 .wlog ul{list-style:none;margin:8px 0;padding:0;display:flex;flex-direction:column}
 .wlog li{display:flex;justify-content:space-between;align-items:center;gap:8px;padding-block:4px;border-bottom:1px dashed var(--line);font-size:14px}
 .wlog li .num{font-size:13px}
-@media (max-width:380px){.wform{grid-template-columns:1fr 1fr}.wform .btn{grid-column:1/-1}}
 </style>
 </head>
 <body>
@@ -237,8 +236,7 @@ html{scroll-behavior:smooth}
     </div>
     <svg id="wChart" viewBox="0 0 320 130" role="img" aria-label="График веса"></svg>
     <form class="wform" id="wForm" novalidate>
-      <div><label for="wDate">Дата</label><input type="date" id="wDate"></div>
-      <div><label for="wVal">Вес утром, кг</label><input id="wVal" inputmode="decimal" placeholder="57,8" autocomplete="off"></div>
+      <div><label for="wVal">Вес сегодня утром, кг</label><input id="wVal" inputmode="decimal" placeholder="57,8" autocomplete="off"></div>
       <button type="submit" class="btn primary">Записать</button>
     </form>
     <p class="f-err" id="wErr" role="alert" hidden></p>
@@ -263,15 +261,15 @@ html{scroll-behavior:smooth}
     <div class="bar"><i id="eatBar"></i></div>
   </div>
   <p class="muted" style="font-size:13px">План на этот день: <b class="num" id="planK">0</b> ккал · Б <b class="num" id="planP">0</b> · Ж <b class="num" id="planF">0</b> · У <b class="num" id="planC">0</b></p>
-  <div id="cookToday"></div>
+  <div id="cookToday" hidden></div>
   <div class="meals" id="meals"></div>
   <datalist id="foodList"></datalist>
   <p class="muted" style="font-size:13px">Галочка — съела приём по плану (только сегодня). Тренировки по умолчанию в Пн, Ср и Пт; в субботу или воскресенье включай «Тренировку» сама. ⇄ — заменить продукт, × — убрать. Замены в обеде и ужине действуют на оба дня готовки, в завтраке и перекусах — на этот день недели. «Вернуть исходный план» всё откатит. «Добавить» — еда сверх плана: на сегодня или, с галочкой, в план. Граммы крупы, макарон и мяса — в сухом и сыром виде.</p>
 </section>
 
 <section id="cook">
-  <h2>Готовка на два дня</h2>
-  <p class="muted">Сколько взять сырых продуктов за одну готовку. Разложи по 2 контейнера на обед и ужин.</p>
+  <h2>Готовка на двоих</h2>
+  <p class="muted">Сколько сырых продуктов взять на двоих за одну готовку.</p>
   <div class="dishes" id="cookList"></div>
 </section>
 
@@ -323,6 +321,20 @@ html{scroll-behavior:smooth}
     <div><b>Без ограничений</b><span>Огурцы, помидоры, капуста, зелень, кофе и чай без сахара, газировка на сахарозаменителе.</span></div>
     <div><b>Ломает дефицит</b><span>Масло «на глаз», соусы, орехи горстями, сок, алкоголь (0,5 л пива ≈ 220 ккал), еда «на пробу».</span></div>
   </div>
+  <h3 style="margin-top:6px">Стоит добавить в рацион</h3>
+  <p class="muted" style="font-size:13px">Всё уже есть в поиске по продуктам и в готовых заменах (⇄).</p>
+  <div class="label-list">
+    <div><b>Минтай, треска</b><span>72–78 ккал и 16–18 г белка на 100 г — самое «лёгкое» мясо. Замороженное филе дешёвое. Замена курице 1:1 по белку, запекать с томатами кубиками.</span></div>
+    <div><b>Горбуша</b><span>140 ккал на 100 г и омега-3. 1–2 раза в неделю вместо бёдер — и капсулы омега-3 не нужны.</span></div>
+    <div><b>Индейка</b><span>Филе грудки: 105 ккал, 23 г белка. Чтобы курица не надоела.</span></div>
+    <div><b>Скир</b><span>Исландский йогурт: 11 г белка при 60 ккал — белка больше, чем в греческом. Перекус без готовки.</span></div>
+    <div><b>Кефир 1%</b><span>40 ккал на 100 г. Вечером вместо йогурта, помогает пищеварению.</span></div>
+    <div><b>Замороженные овощи</b><span>Брокколи, стручковая фасоль, смеси — 25–35 ккал на 100 г. Объём и клетчатка, когда свежие огурцы надоели.</span></div>
+    <div><b>Капуста</b><span>27 ккал на 100 г, хранится неделями. Салат с морковью по-корейски — сытно и дёшево.</span></div>
+    <div><b>Замороженные ягоды, яблоки</b><span>Ягоды 40 ккал, яблоко около 70 ккал за штуку. К творогу и в перекус вместо сладкого.</span></div>
+    <div><b>Красная чечевица</b><span>24 г белка на 100 г сухой, варится 15 минут. Суп или гарнир вместо гречки.</span></div>
+    <div><b>Грецкие орехи</b><span>Полезные жиры, но 650 ккал на 100 г. Только отмеренные 10–15 г к творогу или в салат вместо масла.</span></div>
+  </div>
 </section>
 
 <section id="shop">
@@ -366,7 +378,7 @@ html{scroll-behavior:smooth}
     var START=58, GOAL=55, KEY="sushka-bubochka-weights";
     var W=store.get(KEY)||{}; // {"2026-09-29": 57.8}
     var svg=document.getElementById("wChart"), NS="http://www.w3.org/2000/svg";
-    var dIn=document.getElementById("wDate"), vIn=document.getElementById("wVal"), err=document.getElementById("wErr");
+    var vIn=document.getElementById("wVal"), err=document.getElementById("wErr");
     function iso(d){return new Date(d.getTime()-d.getTimezoneOffset()*60000).toISOString().slice(0,10)}
     function f1(v){return String(Math.round(v*10)/10).replace(".",",")}
     function dayNum(s){return Math.round(new Date(s+"T12:00:00").getTime()/864e5)}
@@ -412,14 +424,13 @@ html{scroll-behavior:smooth}
       ul.innerHTML=L.slice().reverse().map(function(p){var d=p[0].split("-");return '<li><span>'+d[2]+"."+d[1]+"."+d[0]+'</span><span class="xv"><b class="num">'+f1(p[1])+' кг</b> <button type="button" class="ib" data-wdel="'+p[0]+'" aria-label="Удалить запись '+p[0]+'">×</button></span></li>'}).join("");
       ul.querySelectorAll("[data-wdel]").forEach(function(b){b.onclick=function(){delete W[b.dataset.wdel];store.set(KEY,W);draw()}});
     }
-    dIn.value=iso(new Date());
     document.getElementById("wForm").addEventListener("submit",function(e){
       e.preventDefault();
-      var v=parseFloat(String(vIn.value).replace(",",".")), d=dIn.value;
-      var msg=!d?"Выбери дату.":isNaN(v)?"Введи вес числом, например 57,8.":(v<35||v>120)?"Похоже на опечатку: вес должен быть от 35 до 120 кг.":"";
+      var v=parseFloat(String(vIn.value).replace(",",".")), d=iso(new Date());
+      var msg=isNaN(v)?"Введи вес числом, например 57,8.":(v<35||v>120)?"Похоже на опечатку: вес должен быть от 35 до 120 кг.":"";
       err.textContent=msg;err.hidden=!msg;
       if(msg)return;
-      W[d]=Math.round(v*10)/10;store.set(KEY,W);vIn.value="";dIn.value=iso(new Date());draw();
+      W[d]=Math.round(v*10)/10;store.set(KEY,W);vIn.value="";draw();
     });
     document.getElementById("wCopy").onclick=function(){
       var txt=sorted().map(function(p){return p[0]+";"+String(p[1]).replace(".",",")}).join("\n"), out=document.getElementById("wCopied");
@@ -461,7 +472,19 @@ html{scroll-behavior:smooth}
     riceflour:["Мука рисовая",366,6,1.4,80],
     kiwi:["Киви",47,0.8,0.4,8.1],
     carrot:["Морковь по-корейски",119,1.1,8.1,10.4],
-    juice:["Сок J7 апельсиновый",45,0.7,0,10]
+    juice:["Сок J7 апельсиновый",45,0.7,0,10],
+    pollock:["Минтай (филе)",72,16,0.9,0],
+    cod:["Треска (филе)",78,17.7,0.7,0],
+    turkey:["Индейка (филе грудки)",105,23,1.2,0],
+    salmon:["Горбуша",140,20.5,6.5,0],
+    kefir:["Кефир 1%",40,3,1,4],
+    skyr:["Скир",60,11,0.2,3.5],
+    broccoli:["Брокколи замороженная",28,2.8,0.4,4],
+    cabbage:["Капуста белокочанная",27,1.8,0.1,4.7],
+    berries:["Ягоды замороженные",40,0.8,0.3,8],
+    apple:["Яблоко",47,0.4,0.4,9.8],
+    lentil:["Чечевица красная (сухая)",320,24,1.5,52],
+    walnut:["Грецкие орехи",654,15,65,7]
   };
   // item: [product, grams, label override, amount text override, flags]
   // flags: "pre" = moves to the pre-workout snack on a gym day; "cook" = goes to the 2-day cooking list
@@ -629,7 +652,7 @@ html{scroll-behavior:smooth}
       return g>=1000?fmt(Math.round(g/100)/10)+" кг":g+" г";
     }
     return order.map(function(k){var a=agg[k];
-      return [k,(a.g?"тебе "+(a.unit==="g"?a.g+" г":q(a.unit,a.g))+" · ":"")+"вдвоём "+q(a.unit,a.g+(a.k||0))]});
+      return [k,q(a.unit,a.g+(a.k||0))]});
   }
   function cookHTML(c,title){
     var m=buildDay(c.days[0],"rest");
@@ -650,19 +673,19 @@ html{scroll-behavior:smooth}
   function macroLine(x){return x.k+' ккал · Б '+fmt(x.p)+' · Ж '+fmt(x.f)+' · У '+fmt(x.c)}
   // swap groups: basis "k" = equal calories, "p" = equal protein, "w" = equal weight
   var GROUPS=[
-    {b:"k",items:["buck","pasta","soba","potato","oat"]},
-    {b:"k",items:["banana","kiwi","lavash","toast","oat"]},
-    {b:"k",items:["oil","carrot"]},
+    {b:"k",items:["buck","pasta","soba","potato","oat","lentil"]},
+    {b:"k",items:["banana","kiwi","apple","berries","lavash","toast","oat"]},
+    {b:"k",items:["oil","carrot","walnut"]},
     {b:"k",items:["riceflour","oat"]},
     {b:"p",items:["egg","white"]},
     {b:"k",items:["lavash","toast"]},
-    {b:"p",items:["breast","thigh","tuna","wings"]},
-    {b:"p",items:["curd","yog","white","bar"]},
+    {b:"p",items:["breast","thigh","turkey","pollock","cod","salmon","tuna","wings"]},
+    {b:"p",items:["curd","yog","skyr","white","bar"]},
     {b:"p",items:["white","curd","tuna"]},
     {b:"k",items:["cheese","ham","strog"]},
     {b:"p",items:["ham","strog","tuna","breast"]},
-    {b:"k",items:["milk","yog"]},
-    {b:"w",items:["veg","tomato","tomcan"]}
+    {b:"k",items:["milk","kefir","yog"]},
+    {b:"w",items:["veg","tomato","tomcan","broccoli","cabbage"]}
   ];
   var ROUND={potato:10,veg:10,tomato:10,tomcan:10,milk:10,yog:10,curd:10,white:10};
   function altsFor(item){

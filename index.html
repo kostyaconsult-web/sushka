@@ -294,6 +294,20 @@ html{scroll-behavior:smooth}
     <div><b>Без ограничений</b><span>Огурцы, помидоры, капуста, зелень, кофе и чай без сахара, газировка на сахарозаменителе.</span></div>
     <div><b>Ломает дефицит</b><span>Масло «на глаз», соусы, орехи горстями, сок, алкоголь (0,5 л пива ≈ 220 ккал), еда «на пробу».</span></div>
   </div>
+  <h3 style="margin-top:6px">Стоит добавить в рацион</h3>
+  <p class="muted" style="font-size:13px">Всё уже есть в поиске по продуктам и в готовых заменах (⇄).</p>
+  <div class="label-list">
+    <div><b>Минтай, треска</b><span>72–78 ккал и 16–18 г белка на 100 г — самое «лёгкое» мясо. Замороженное филе дешёвое. Замена курице 1:1 по белку, запекать с томатами кубиками.</span></div>
+    <div><b>Горбуша</b><span>140 ккал на 100 г и омега-3. 1–2 раза в неделю вместо бёдер — и капсулы омега-3 не нужны.</span></div>
+    <div><b>Индейка</b><span>Филе грудки: 105 ккал, 23 г белка. Чтобы курица не надоела.</span></div>
+    <div><b>Скир</b><span>Исландский йогурт: 11 г белка при 60 ккал — белка больше, чем в греческом. Перекус без готовки.</span></div>
+    <div><b>Кефир 1%</b><span>40 ккал на 100 г. Вечером вместо йогурта, помогает пищеварению.</span></div>
+    <div><b>Замороженные овощи</b><span>Брокколи, стручковая фасоль, смеси — 25–35 ккал на 100 г. Объём и клетчатка, когда свежие огурцы надоели.</span></div>
+    <div><b>Капуста</b><span>27 ккал на 100 г, хранится неделями. Салат с морковью по-корейски — сытно и дёшево.</span></div>
+    <div><b>Замороженные ягоды, яблоки</b><span>Ягоды 40 ккал, яблоко около 70 ккал за штуку. К творогу и в перекус вместо сладкого.</span></div>
+    <div><b>Красная чечевица</b><span>24 г белка на 100 г сухой, варится 15 минут. Суп или гарнир вместо гречки.</span></div>
+    <div><b>Грецкие орехи</b><span>Полезные жиры, но 650 ккал на 100 г. Только отмеренные 10–15 г к творогу или в салат вместо масла.</span></div>
+  </div>
 </section>
 
 <section id="shop">
@@ -378,7 +392,19 @@ html{scroll-behavior:smooth}
     riceflour:["Мука рисовая",366,6,1.4,80],
     kiwi:["Киви",47,0.8,0.4,8.1],
     carrot:["Морковь по-корейски",119,1.1,8.1,10.4],
-    juice:["Сок J7 апельсиновый",45,0.7,0,10]
+    juice:["Сок J7 апельсиновый",45,0.7,0,10],
+    pollock:["Минтай (филе)",72,16,0.9,0],
+    cod:["Треска (филе)",78,17.7,0.7,0],
+    turkey:["Индейка (филе грудки)",105,23,1.2,0],
+    salmon:["Горбуша",140,20.5,6.5,0],
+    kefir:["Кефир 1%",40,3,1,4],
+    skyr:["Скир",60,11,0.2,3.5],
+    broccoli:["Брокколи замороженная",28,2.8,0.4,4],
+    cabbage:["Капуста белокочанная",27,1.8,0.1,4.7],
+    berries:["Ягоды замороженные",40,0.8,0.3,8],
+    apple:["Яблоко",47,0.4,0.4,9.8],
+    lentil:["Чечевица красная (сухая)",320,24,1.5,52],
+    walnut:["Грецкие орехи",654,15,65,7]
   };
   // item: [product, grams, label override, amount text override, flags]
   // flags: "pre" = moves to the pre-workout snack on a gym day; "cook" = goes to the 2-day cooking list
@@ -542,19 +568,19 @@ html{scroll-behavior:smooth}
   function macroLine(x){return x.k+' ккал · Б '+fmt(x.p)+' · Ж '+fmt(x.f)+' · У '+fmt(x.c)}
   // swap groups: basis "k" = equal calories, "p" = equal protein, "w" = equal weight
   var GROUPS=[
-    {b:"k",items:["buck","pasta","soba","potato","oat"]},
-    {b:"k",items:["banana","kiwi","lavash","toast","oat"]},
-    {b:"k",items:["oil","carrot"]},
+    {b:"k",items:["buck","pasta","soba","potato","oat","lentil"]},
+    {b:"k",items:["banana","kiwi","apple","berries","lavash","toast","oat"]},
+    {b:"k",items:["oil","carrot","walnut"]},
     {b:"k",items:["riceflour","oat"]},
     {b:"p",items:["egg","white"]},
     {b:"k",items:["lavash","toast"]},
-    {b:"p",items:["breast","thigh","tuna","wings"]},
-    {b:"p",items:["curd","yog","white","bar"]},
+    {b:"p",items:["breast","thigh","turkey","pollock","cod","salmon","tuna","wings"]},
+    {b:"p",items:["curd","yog","skyr","white","bar"]},
     {b:"p",items:["white","curd","tuna"]},
     {b:"k",items:["cheese","ham","strog"]},
     {b:"p",items:["ham","strog","tuna","breast"]},
-    {b:"k",items:["milk","yog"]},
-    {b:"w",items:["veg","tomato","tomcan"]}
+    {b:"k",items:["milk","kefir","yog"]},
+    {b:"w",items:["veg","tomato","tomcan","broccoli","cabbage"]}
   ];
   var ROUND={potato:10,veg:10,tomato:10,tomcan:10,milk:10,yog:10,curd:10,white:10};
   function altsFor(item){

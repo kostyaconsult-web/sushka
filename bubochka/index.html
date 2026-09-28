@@ -126,6 +126,16 @@ section{display:flex;flex-direction:column;gap:14px;scroll-margin-top:64px}
 .gap h3{color:var(--prot)}
 .gap p{font-size:14px}
 .gap .sugg-b{background:var(--surface)}
+.norm{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:12px 14px;display:flex;flex-direction:column;gap:7px}
+.wcard .norm{border:0;padding:4px 0 0;border-top:1px solid var(--line);border-radius:0}
+.nrow{display:grid;grid-template-columns:62px 1fr 46px;gap:8px;align-items:center;font-size:13px}
+.nrow .nl{color:var(--muted);font-weight:600}
+.nrow .nb{height:10px;border-radius:999px;background:var(--sunk);overflow:hidden}
+.nrow .nb i{display:block;height:100%;border-radius:999px;background:var(--accent)}
+.nrow.over .nb i{background:var(--prot)}
+.nrow .np{font-family:var(--mono);font-weight:700;text-align:right}
+.nrow.over .np{color:var(--prot)}
+.nsub{font-size:12px;color:var(--muted)}
 .note{background:var(--accent-soft);border-radius:12px;padding:12px 14px;font-size:14px}
 .note.warm{background:var(--prot-soft)}
 
@@ -172,7 +182,8 @@ footer{font-size:13px;color:var(--muted)}
 @media (max-width:460px){
   .targets{grid-template-columns:repeat(2,1fr)}
   .plateau{grid-template-columns:1fr}
-  .plateau .goal{text-align:left}
+  .plateau .goal{text-align:left;display:flex;align-items:baseline;gap:8px;flex-wrap:wrap}
+  .plateau .goal b{font-size:18px}
   .label-list div{grid-template-columns:1fr;gap:2px}
 }
 @media (prefers-reduced-motion:reduce){*{transition:none!important;scroll-behavior:auto!important}}
@@ -238,11 +249,12 @@ html{scroll-behavior:smooth}
       <div><p class="eyebrow">Вес, кг</p><p class="wstat" id="wStat">Старт 58 кг · цель 55 кг</p></div>
       <div class="goal"><span class="eyebrow">Цель к декабрю</span><b>55 кг</b></div>
     </div>
-    <svg id="wChart" viewBox="0 0 320 130" role="img" aria-label="График веса"></svg>
+    <svg id="wChart" viewBox="0 0 320 84" role="img" aria-label="График веса"></svg>
     <form class="wform" id="wForm" novalidate>
       <div><label for="wVal">Вес сегодня утром, кг</label><input id="wVal" inputmode="decimal" placeholder="57,8" autocomplete="off"></div>
       <button type="submit" class="btn primary">Записать</button>
     </form>
+    <div class="norm" id="norm"></div>
     <p class="f-err" id="wErr" role="alert" hidden></p>
     <details class="wlog"><summary>Все записи (<span id="wCount">0</span>)</summary>
       <ul id="wList"></ul>
@@ -413,7 +425,7 @@ html{scroll-behavior:smooth}
     function el(t,a,txt){var e=document.createElementNS(NS,t);for(var k in a)e.setAttribute(k,a[k]);if(txt!=null)e.textContent=txt;svg.appendChild(e);return e}
     function draw(){
       svg.innerHTML="";
-      var L=sorted(), x0=30,x1=310,y0=8,y1=104;
+      var L=sorted(), x0=30,x1=310,y0=8,y1=62;
       var today=dayNum(iso(new Date()));
       var dMin=L.length?dayNum(L[0][0]):today, dMax=Math.max(today,L.length?dayNum(L[L.length-1][0]):today);
       if(dMax-dMin<14)dMin=dMax-14;
@@ -421,7 +433,7 @@ html{scroll-behavior:smooth}
       var lo=Math.floor(Math.min.apply(null,vals)-0.5), hi=Math.ceil(Math.max.apply(null,vals)+0.5);
       function X(d){return x0+(d-dMin)/(dMax-dMin)*(x1-x0)}
       function Y(v){return y1-(v-lo)/(hi-lo)*(y1-y0)}
-      var step=hi-lo>6?2:1;
+      var step=hi-lo>3?2:1;
       for(var v=lo;v<=hi;v+=step){el("line",{x1:x0,x2:x1,y1:Y(v),y2:Y(v),stroke:"var(--line)","stroke-width":1});el("text",{x:x0-6,y:Y(v)+4,"text-anchor":"end","font-size":10,fill:"var(--muted)","font-family":"JetBrains Mono, monospace"},v)}
       el("line",{x1:x0,x2:x1,y1:Y(GOAL),y2:Y(GOAL),stroke:"var(--accent)","stroke-width":1.5,"stroke-dasharray":"4 3"});
       el("text",{x:x1,y:Y(GOAL)-4,"text-anchor":"end","font-size":10,fill:"var(--accent)","font-family":"Manrope, sans-serif","font-weight":700},"цель 55");
@@ -432,7 +444,7 @@ html{scroll-behavior:smooth}
         if(L.length>1)el("polyline",{points:avgPts.map(function(p){return X(p[0])+","+Y(p[1])}).join(" "),fill:"none",stroke:"var(--prot)","stroke-width":2,"stroke-linejoin":"round",opacity:.9});
         L.forEach(function(p,i){var last=i===L.length-1;el("circle",{cx:X(dayNum(p[0])),cy:Y(p[1]),r:last?4:2.4,fill:last?"var(--accent)":"var(--surface)",stroke:"var(--accent)","stroke-width":1.5})});
       }
-      function lab(d,anchor){var dt=new Date(d*864e5);el("text",{x:X(d),y:124,"text-anchor":anchor,"font-size":10,fill:"var(--muted)","font-family":"JetBrains Mono, monospace"},dt.getUTCDate()+"."+String(dt.getUTCMonth()+1).padStart(2,"0"))}
+      function lab(d,anchor){var dt=new Date(d*864e5);el("text",{x:X(d),y:80,"text-anchor":anchor,"font-size":10,fill:"var(--muted)","font-family":"JetBrains Mono, monospace"},dt.getUTCDate()+"."+String(dt.getUTCMonth()+1).padStart(2,"0"))}
       lab(dMin,"start");lab(dMax,"end");
       // stats
       var st=document.getElementById("wStat");
@@ -595,6 +607,7 @@ html{scroll-behavior:smooth}
     if(g===null||isNaN(g))return null;
     var m=g/100;return {k:Math.round(k*m),p:r1(p*m),f:r1(f*m),c:r1(c*m)};
   }
+  var TARGET={k:1750,p:140,f:55,c:170};
   var DAYN=["Пн","Вт","Ср","Чт","Пт","Сб","Вс"];
   var DAYFULL=["понедельник","вторник","среду","четверг","пятницу","субботу","воскресенье"];
 
@@ -838,6 +851,17 @@ html{scroll-behavior:smooth}
     if(g.dk>=150)return '<div class="gap"><h3>Перебор за день: +'+g.dk+' ккал</h3><p>После изменений в меню выходит больше плана. Убери что-нибудь (×) или замени на более лёгкое (⇄).</p></div>';
     return "";
   }
+  // ---------- today's intake as % of the daily norm ----------
+  function renderNorm(){
+    var box=document.getElementById("norm");if(!box)return;
+    var t={k:0,p:0,f:0,c:0};
+    buildDay(todayIdx,st.mode).forEach(function(m){var mt=mealTotals(m);t.k+=mt.k;t.p+=mt.p;t.f+=mt.f;t.c+=mt.c});
+    var rows=[["Калории","k","ккал"],["Белки","p","г"],["Жиры","f","г"],["Углеводы","c","г"]];
+    box.innerHTML='<p class="eyebrow">Сегодня съедено от нормы</p>'+rows.map(function(r){
+      var v=t[r[1]],n=TARGET[r[1]],pc=Math.round(v/n*100),over=pc>105;
+      return '<div class="nrow'+(over?' over':'')+'" title="'+Math.round(v)+' из '+n+' '+r[2]+'"><span class="nl">'+r[0]+'</span><span class="nb"><i style="width:'+Math.min(100,pc)+'%"></i></span><span class="np">'+pc+'%</span></div>';
+    }).join("")+'<p class="nsub">'+(t.k?Math.round(t.k)+' из '+TARGET.k+' ккал · Б '+Math.round(t.p)+' · Ж '+Math.round(t.f)+' · У '+Math.round(t.c):'Отмечай съеденные приёмы в меню — здесь появится процент от нормы.')+'</p>';
+  }
   function render(){
     renderDays();renderCook();
     var list=buildDay(selDay,curMode()),tdy=isToday();box.innerHTML="";
@@ -888,6 +912,7 @@ html{scroll-behavior:smooth}
     document.getElementById("eatF").textContent=Math.round(t.f);document.getElementById("eatC").textContent=Math.round(t.c);
     document.getElementById("eatBar").style.width=Math.min(100,t.k/1750*100)+"%";
     document.getElementById("eatBar").classList.toggle("over",t.k>1750);
+    renderNorm();
     var pl=sum([].concat.apply([],list.map(planItems)));
     document.getElementById("planK").textContent=Math.round(pl.k);document.getElementById("planP").textContent=Math.round(pl.p);
     document.getElementById("planF").textContent=Math.round(pl.f);document.getElementById("planC").textContent=Math.round(pl.c);

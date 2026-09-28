@@ -126,6 +126,16 @@ section{display:flex;flex-direction:column;gap:14px;scroll-margin-top:64px}
 .gap h3{color:var(--prot)}
 .gap p{font-size:14px}
 .gap .sugg-b{background:var(--surface)}
+.norm{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:12px 14px;display:flex;flex-direction:column;gap:7px}
+.wcard .norm{border:0;padding:4px 0 0;border-top:1px solid var(--line);border-radius:0}
+.nrow{display:grid;grid-template-columns:62px 1fr 46px;gap:8px;align-items:center;font-size:13px}
+.nrow .nl{color:var(--muted);font-weight:600}
+.nrow .nb{height:10px;border-radius:999px;background:var(--sunk);overflow:hidden}
+.nrow .nb i{display:block;height:100%;border-radius:999px;background:var(--accent)}
+.nrow.over .nb i{background:var(--prot)}
+.nrow .np{font-family:var(--mono);font-weight:700;text-align:right}
+.nrow.over .np{color:var(--prot)}
+.nsub{font-size:12px;color:var(--muted)}
 .note{background:var(--accent-soft);border-radius:12px;padding:12px 14px;font-size:14px}
 .note.warm{background:var(--prot-soft)}
 
@@ -172,7 +182,8 @@ footer{font-size:13px;color:var(--muted)}
 @media (max-width:460px){
   .targets{grid-template-columns:repeat(2,1fr)}
   .plateau{grid-template-columns:1fr}
-  .plateau .goal{text-align:left}
+  .plateau .goal{text-align:left;display:flex;align-items:baseline;gap:8px;flex-wrap:wrap}
+  .plateau .goal b{font-size:18px}
   .label-list div{grid-template-columns:1fr;gap:2px}
 }
 @media (prefers-reduced-motion:reduce){*{transition:none!important;scroll-behavior:auto!important}}
@@ -217,10 +228,11 @@ html{scroll-behavior:smooth}
   <div class="plateau">
     <div>
       <p class="eyebrow">Вес из приложения, кг</p>
-      <svg id="spark" viewBox="0 0 320 96" role="img" aria-label="Вес с 8 по 28 сентября: от 89 до 90,7, последние две недели около 90"></svg>
+      <svg id="spark" viewBox="0 0 320 70" role="img" aria-label="Вес с 8 по 28 сентября: от 89 до 90,7, последние две недели около 90"></svg>
     </div>
     <div class="goal"><span class="eyebrow">Цель к январю</span><b>83–84</b><span class="muted" style="font-size:13px">−0,5 кг в неделю</span></div>
   </div>
+  <div class="norm" id="norm"></div>
 </header>
 
 <section id="menu">
@@ -375,7 +387,7 @@ html{scroll-behavior:smooth}
   // weight sparkline
   var W=[["09-08",89],["09-09",89.1],["09-10",89.9],["09-15",90.7],["09-16",90.5],["09-17",90.5],["09-18",89.8],["09-19",90.5],["09-21",90.3],["09-22",90.5],["09-23",90],["09-24",90],["09-25",90],["09-28",90.2]];
   var svg=document.getElementById("spark"), NS="http://www.w3.org/2000/svg";
-  var x0=30,x1=300,y0=10,y1=74,lo=88.5,hi=91;
+  var x0=30,x1=300,y0=10,y1=50,lo=88.5,hi=91;
   function X(d){var day=+d.slice(3);return x0+(day-8)/20*(x1-x0)}
   function Y(v){return y1-(v-lo)/(hi-lo)*(y1-y0)}
   function el(t,a){var e=document.createElementNS(NS,t);for(var k in a)e.setAttribute(k,a[k]);svg.appendChild(e);return e}
@@ -383,7 +395,7 @@ html{scroll-behavior:smooth}
   [89,90,91].forEach(function(v){el("line",{x1:x0,x2:x1,y1:Y(v),y2:Y(v),stroke:"var(--line)","stroke-width":1});var t=el("text",{x:x0-6,y:Y(v)+4,"text-anchor":"end","font-size":10,fill:"var(--muted)","font-family":"JetBrains Mono, monospace"});t.textContent=v});
   el("polyline",{points:W.map(function(p){return X(p[0])+","+Y(p[1])}).join(" "),fill:"none",stroke:"var(--accent)","stroke-width":2,"stroke-linejoin":"round"});
   W.forEach(function(p,i){el("circle",{cx:X(p[0]),cy:Y(p[1]),r:i===W.length-1?4:2.2,fill:i===W.length-1?"var(--accent)":"var(--surface)",stroke:"var(--accent)","stroke-width":1.5})});
-  [["8.09","09-08","start"],["15.09","09-15","middle"],["28.09","09-28","end"]].forEach(function(l){var t=el("text",{x:X(l[1]),y:92,"text-anchor":l[2],"font-size":10,fill:"var(--muted)","font-family":"JetBrains Mono, monospace"});t.textContent=l[0]});
+  [["8.09","09-08","start"],["15.09","09-15","middle"],["28.09","09-28","end"]].forEach(function(l){var t=el("text",{x:X(l[1]),y:66,"text-anchor":l[2],"font-size":10,fill:"var(--muted)","font-family":"JetBrains Mono, monospace"});t.textContent=l[0]});
   var t=el("text",{x:X("09-15")+4,y:Y(90.7)-3,"font-size":10,fill:"var(--muted)","font-family":"Manrope, sans-serif"});t.textContent="стоит 2 недели";
 
   // products per 100 g: [name, kcal, protein, fat, carbs, unit note]
@@ -500,6 +512,7 @@ html{scroll-behavior:smooth}
     if(g===null||isNaN(g))return null;
     var m=g/100;return {k:Math.round(k*m),p:r1(p*m),f:r1(f*m),c:r1(c*m)};
   }
+  var TARGET={k:2250,p:200,f:57,c:215};
   var DAYN=["Пн","Вт","Ср","Чт","Пт","Сб","Вс"];
   var DAYFULL=["понедельник","вторник","среду","четверг","пятницу","субботу","воскресенье"];
 
@@ -733,6 +746,17 @@ html{scroll-behavior:smooth}
     if(g.dk>=150)return '<div class="gap"><h3>Перебор за день: +'+g.dk+' ккал</h3><p>После изменений в меню выходит больше плана. Убери что-нибудь (×) или замени на более лёгкое (⇄).</p></div>';
     return "";
   }
+  // ---------- today's intake as % of the daily norm ----------
+  function renderNorm(){
+    var box=document.getElementById("norm");if(!box)return;
+    var t={k:0,p:0,f:0,c:0};
+    buildDay(todayIdx,st.mode).forEach(function(m){var mt=mealTotals(m);t.k+=mt.k;t.p+=mt.p;t.f+=mt.f;t.c+=mt.c});
+    var rows=[["Калории","k","ккал"],["Белки","p","г"],["Жиры","f","г"],["Углеводы","c","г"]];
+    box.innerHTML='<p class="eyebrow">Сегодня съедено от нормы</p>'+rows.map(function(r){
+      var v=t[r[1]],n=TARGET[r[1]],pc=Math.round(v/n*100),over=pc>105;
+      return '<div class="nrow'+(over?' over':'')+'" title="'+Math.round(v)+' из '+n+' '+r[2]+'"><span class="nl">'+r[0]+'</span><span class="nb"><i style="width:'+Math.min(100,pc)+'%"></i></span><span class="np">'+pc+'%</span></div>';
+    }).join("")+'<p class="nsub">'+(t.k?Math.round(t.k)+' из '+TARGET.k+' ккал · Б '+Math.round(t.p)+' · Ж '+Math.round(t.f)+' · У '+Math.round(t.c):'Отмечай съеденные приёмы в меню — здесь появится процент от нормы.')+'</p>';
+  }
   function render(){
     renderDays();renderCook();
     var list=buildDay(selDay,curMode()),tdy=isToday();box.innerHTML="";
@@ -783,6 +807,7 @@ html{scroll-behavior:smooth}
     document.getElementById("eatF").textContent=Math.round(t.f);document.getElementById("eatC").textContent=Math.round(t.c);
     document.getElementById("eatBar").style.width=Math.min(100,t.k/2250*100)+"%";
     document.getElementById("eatBar").classList.toggle("over",t.k>2250);
+    renderNorm();
     var pl=sum([].concat.apply([],list.map(planItems)));
     document.getElementById("planK").textContent=Math.round(pl.k);document.getElementById("planP").textContent=Math.round(pl.p);
     document.getElementById("planF").textContent=Math.round(pl.f);document.getElementById("planC").textContent=Math.round(pl.c);

@@ -204,6 +204,13 @@ html{scroll-behavior:smooth}
     <div><b>~57</b><span>жиры, г</span></div>
     <div><b>~215</b><span>углеводы, г</span></div>
   </div>
+  <div class="plateau">
+    <div>
+      <p class="eyebrow">Вес из приложения, кг</p>
+      <svg id="spark" viewBox="0 0 320 96" role="img" aria-label="Вес с 8 по 28 сентября: от 89 до 90,7, последние две недели около 90"></svg>
+    </div>
+    <div class="goal"><span class="eyebrow">Цель к январю</span><b>83–84</b><span class="muted" style="font-size:13px">−0,5 кг в неделю</span></div>
+  </div>
 </header>
 
 <section id="menu">
@@ -313,6 +320,20 @@ html{scroll-behavior:smooth}
 <script>
 (function(){
   var store={get:function(k){try{return JSON.parse(localStorage.getItem(k))}catch(e){return null}},set:function(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}};
+
+  // weight sparkline
+  var W=[["09-08",89],["09-09",89.1],["09-10",89.9],["09-15",90.7],["09-16",90.5],["09-17",90.5],["09-18",89.8],["09-19",90.5],["09-21",90.3],["09-22",90.5],["09-23",90],["09-24",90],["09-25",90],["09-28",90.2]];
+  var svg=document.getElementById("spark"), NS="http://www.w3.org/2000/svg";
+  var x0=30,x1=300,y0=10,y1=74,lo=88.5,hi=91;
+  function X(d){var day=+d.slice(3);return x0+(day-8)/20*(x1-x0)}
+  function Y(v){return y1-(v-lo)/(hi-lo)*(y1-y0)}
+  function el(t,a){var e=document.createElementNS(NS,t);for(var k in a)e.setAttribute(k,a[k]);svg.appendChild(e);return e}
+  el("rect",{x:X("09-15"),y:Y(90.7),width:x1-X("09-15"),height:Y(89.8)-Y(90.7),fill:"var(--accent-soft)"});
+  [89,90,91].forEach(function(v){el("line",{x1:x0,x2:x1,y1:Y(v),y2:Y(v),stroke:"var(--line)","stroke-width":1});var t=el("text",{x:x0-6,y:Y(v)+4,"text-anchor":"end","font-size":10,fill:"var(--muted)","font-family":"JetBrains Mono, monospace"});t.textContent=v});
+  el("polyline",{points:W.map(function(p){return X(p[0])+","+Y(p[1])}).join(" "),fill:"none",stroke:"var(--accent)","stroke-width":2,"stroke-linejoin":"round"});
+  W.forEach(function(p,i){el("circle",{cx:X(p[0]),cy:Y(p[1]),r:i===W.length-1?4:2.2,fill:i===W.length-1?"var(--accent)":"var(--surface)",stroke:"var(--accent)","stroke-width":1.5})});
+  [["8.09","09-08","start"],["15.09","09-15","middle"],["28.09","09-28","end"]].forEach(function(l){var t=el("text",{x:X(l[1]),y:92,"text-anchor":l[2],"font-size":10,fill:"var(--muted)","font-family":"JetBrains Mono, monospace"});t.textContent=l[0]});
+  var t=el("text",{x:X("09-15")+4,y:Y(90.7)-3,"font-size":10,fill:"var(--muted)","font-family":"Manrope, sans-serif"});t.textContent="стоит 2 недели";
 
   // products per 100 g: [name, kcal, protein, fat, carbs, unit note]
   var P={

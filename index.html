@@ -122,6 +122,10 @@ section{display:flex;flex-direction:column;gap:14px;scroll-margin-top:64px}
 .f-act{display:flex;gap:8px}
 .btn.primary{background:var(--accent);border-color:var(--accent);color:var(--bg)}
 @media (max-width:380px){.f-mac{grid-template-columns:repeat(2,1fr)}}
+.gap{background:var(--prot-soft);border-radius:12px;padding:12px 14px;display:flex;flex-direction:column;gap:8px}
+.gap h3{color:var(--prot)}
+.gap p{font-size:14px}
+.gap .sugg-b{background:var(--surface)}
 .note{background:var(--accent-soft);border-radius:12px;padding:12px 14px;font-size:14px}
 .note.warm{background:var(--prot-soft)}
 
@@ -691,12 +695,51 @@ html{scroll-behavior:smooth}
     }).join("");
     c.querySelectorAll("[data-day]").forEach(function(b){b.onclick=function(){selDay=+b.dataset.day;openFor=null;replacing=null;render()}});
   }
+  // ---------- shortfall hint: plan edits vs the original menu of the day ----------
+  function dayGap(list,tdy){
+    var o={k:0,p:0},c={k:0,p:0},last=-1;
+    list.forEach(function(m,j){
+      var a=sum(m.items),b=sum(planItems(m));
+      if(tdy){var e=sum(st.extras[m.id]||[]);b.k+=e.k;b.p+=e.p}
+      o.k+=a.k;o.p+=a.p;c.k+=b.k;c.p+=b.p;
+      if(Math.abs(a.k-b.k)>=1||Math.abs(a.p-b.p)>=1)last=j;
+    });
+    var target=null;
+    for(var j=last+1;j<list.length;j++)if(list[j].scope.charAt(0)==="d"){target=list[j];break}
+    if(!target&&last>=0)target=list[last].scope.charAt(0)==="d"?list[last]:list[list.length-1];
+    return {dk:Math.round(c.k-o.k),dp:Math.round(c.p-o.p),last:last,target:target};
+  }
+  function gapFoods(g){
+    var out=[];
+    if(g.dp<=-10){
+      ["curd","skyr","tuna","white"].forEach(function(k){var p=P[k],gr=Math.ceil(-g.dp/(p[2]/100)/10)*10,m=gr/100;
+        out.push({prod:k,n:p[0],g:gr,k:Math.round(p[1]*m),p:r1(p[2]*m),f:r1(p[3]*m),c:r1(p[4]*m)})});
+    }else if(g.dk<=-100){
+      ["banana","apple","lavash","oat"].forEach(function(k){var p=P[k],gr=Math.max(5,Math.round(-g.dk/(p[1]/100)/5)*5),m=gr/100;
+        out.push({prod:k,n:p[0],g:gr,k:Math.round(p[1]*m),p:r1(p[2]*m),f:r1(p[3]*m),c:r1(p[4]*m)})});
+    }
+    return out.slice(0,3);
+  }
+  function gapHTML(g){
+    if(g.dp<=-10||g.dk<=-100){
+      var foods=gapFoods(g),what=[];
+      if(g.dk<0)what.push(-g.dk+" ккал");
+      if(g.dp<0)what.push("белок "+(-g.dp)+" г");
+      return '<div class="gap"><h3>Недобор за день: '+what.join(" · ")+'</h3>'+
+        '<p>После изменений в меню до плана не хватает. Добери в приёме «'+esc(g.target.name)+'»:</p>'+
+        foods.map(function(f,i){return '<button type="button" class="sugg-b" data-gap="'+i+'"><span class="sn">+ '+esc(f.n.replace(/ ((сухая|сухие))/,""))+' <b class="num">'+f.g+' г</b></span><span class="sm num">'+f.k+' ккал · Б '+fmt(f.p)+'</span></button>'}).join("")+
+      '</div>';
+    }
+    if(g.dk>=150)return '<div class="gap"><h3>Перебор за день: +'+g.dk+' ккал</h3><p>После изменений в меню выходит больше плана. Убери что-нибудь (×) или замени на более лёгкое (⇄).</p></div>';
+    return "";
+  }
   function render(){
     renderDays();renderCook();
     var list=buildDay(selDay,curMode()),tdy=isToday();box.innerHTML="";
     document.getElementById("dayTitle").textContent=tdy?"Меню на сегодня":"Меню на "+DAYFULL[selDay];
     document.getElementById("tracker").hidden=!tdy;
-    list.forEach(function(m){
+    var gap=dayGap(list,tdy);
+    list.forEach(function(m,mi){
       var d=document.createElement("div");d.className="meal"+(tdy?"":" plain")+(tdy&&st.done[m.id]?" is-done":"");
       var id="m-"+m.id, ex=tdy?(st.extras[m.id]||[]):[], items=planItems(m), pt=sum(items);
       var exK=ex.reduce(function(s,x){return s+x.k},0);
@@ -721,6 +764,19 @@ html{scroll-behavior:smooth}
       var form=d.querySelector("form");
       if(form)wireForm(form,m);
       box.appendChild(d);
+      if(mi===gap.last){
+        var gh=gapHTML(gap);
+        if(gh){
+          var gw=document.createElement("div");gw.innerHTML=gh;var gEl=gw.firstChild;
+          var foods=gapFoods(gap);
+          gEl.querySelectorAll("[data-gap]").forEach(function(b){b.onclick=function(){
+            var f=foods[+b.dataset.gap],k=gap.target.scope+":"+gap.target.id;
+            (plan.added[k]=plan.added[k]||[]).push({n:f.n,a:f.g+" г",g:f.g,k:f.k,p:f.p,f:f.f,c:f.c,prod:f.prod});
+            savePlan();render();
+          }});
+          box.appendChild(gEl);
+        }
+      }
     });
     var t={k:0,p:0,f:0,c:0};list.forEach(function(m){var mt=mealTotals(m);t.k+=mt.k;t.p+=mt.p;t.f+=mt.f;t.c+=mt.c});
     document.getElementById("eatK").textContent=Math.round(t.k);document.getElementById("eatP").textContent=Math.round(t.p);

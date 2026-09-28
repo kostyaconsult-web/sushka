@@ -43,8 +43,8 @@ p{margin:0}
 /* nav */
 nav{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--bg);margin-inline:-16px;padding:10px 16px;border-bottom:1px solid var(--line);overflow-x:auto;scrollbar-width:none}
 nav::-webkit-scrollbar{display:none}
-nav .tabs{display:flex;gap:6px;max-width:720px;margin:0 auto}
-nav a{flex:none;text-decoration:none;color:var(--ink);font-weight:600;font-size:14px;padding:6px 12px;border-radius:999px;background:var(--sunk)}
+nav .tabs{display:flex;gap:3px;max-width:720px;margin:0 auto}
+nav a{flex:1 1 auto;text-align:center;white-space:nowrap;text-decoration:none;color:var(--ink);font-weight:600;font-size:12px;padding:5px 3px;border-radius:999px;background:var(--sunk)}
 nav a:focus-visible,button:focus-visible,input:focus-visible+label{outline:2px solid var(--accent);outline-offset:2px}
 
 /* header */
@@ -89,10 +89,16 @@ section{display:flex;flex-direction:column;gap:14px;scroll-margin-top:64px}
 .extras{grid-column:2;display:flex;flex-direction:column;gap:4px;padding-top:8px;border-top:1px solid var(--line);margin-top:4px}
 .extras li{align-items:center;flex-wrap:wrap}
 .extras .xv{display:inline-flex;align-items:center;gap:6px}
-.ib{border:0;background:var(--sunk);color:var(--muted);width:28px;height:28px;border-radius:8px;font-size:15px;line-height:1;cursor:pointer;flex:none}
-.ib:hover{color:var(--ink)}
+.ib{border:1px solid var(--line);background:transparent;color:var(--muted);width:22px;height:22px;padding:0;border-radius:6px;font-size:12px;line-height:1;cursor:pointer;flex:none;display:inline-grid;place-items:center}
+.ib:hover{color:var(--ink);border-color:var(--muted)}
+.sugg{grid-column:1/-1;display:flex;flex-direction:column;gap:6px}
+.sugg-b{display:flex;flex-direction:column;align-items:flex-start;gap:1px;text-align:left;border:1px solid var(--line);background:var(--surface);color:var(--ink);border-radius:10px;padding:8px 10px;cursor:pointer;font:500 14px var(--sans)}
+.sugg-b:hover{border-color:var(--accent)}
+.sugg-b .sn b{color:var(--accent);font-size:13px}
+.sugg-b .sm{font-size:12px;color:var(--muted)}
 .meal ul.plan li{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center}
 .meal ul.plan .xv{flex-wrap:nowrap;white-space:nowrap;gap:4px}
+.meal ul.plan .xv .g{margin-right:4px}
 .meal.is-done .ib{background:var(--surface)}
 .meal li .nm{min-width:0}
 .chip{font-size:10px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;padding:1px 6px;border-radius:999px;background:var(--accent-soft);color:var(--accent);vertical-align:1px}
@@ -100,7 +106,7 @@ section{display:flex;flex-direction:column;gap:14px;scroll-margin-top:64px}
 .linkbtn{grid-column:2;justify-self:start;border:0;background:none;padding:2px 0;color:var(--accent);font:600 13px var(--sans);text-decoration:underline;cursor:pointer}
 .f-title{grid-column:1/-1;font-size:14px}
 .addform label.f-keep{grid-column:1/-1;display:flex;align-items:center;gap:8px;font-size:14px;color:var(--ink);margin:0;cursor:pointer}
-.f-keep input{width:18px;height:18px;accent-color:var(--accent)}
+.addform .f-keep input{width:18px;height:18px;flex:none;padding:0;accent-color:var(--accent)}
 .addbtn{grid-column:2;justify-self:start;margin-top:6px;border:1px dashed var(--accent);background:transparent;color:var(--accent);font:600 13px var(--sans);padding:7px 12px;border-radius:999px;cursor:pointer}
 .addform{grid-column:1/-1;margin-top:8px;padding:12px;border-radius:10px;background:var(--sunk);display:grid;grid-template-columns:1fr 90px;gap:10px}
 .addform label{display:block;font-size:12px;font-weight:600;color:var(--muted);margin-bottom:3px}
@@ -524,8 +530,53 @@ html{scroll-behavior:smooth}
   var openFor=null, replacing=null, draft=emptyDraft(), formErr="";
   function emptyDraft(){return {n:"",g:"",k:"",p:"",f:"",c:"",keep:false}}
   function macroLine(x){return x.k+' ккал · Б '+fmt(x.p)+' · Ж '+fmt(x.f)+' · У '+fmt(x.c)}
+  // swap groups: basis "k" = equal calories, "p" = equal protein, "w" = equal weight
+  var GROUPS=[
+    {b:"k",items:["buck","pasta","soba","potato","oat"]},
+    {b:"k",items:["banana","lavash","toast","oat"]},
+    {b:"k",items:["lavash","toast"]},
+    {b:"p",items:["breast","thigh","tuna","wings"]},
+    {b:"p",items:["curd","yog","white","bar"]},
+    {b:"p",items:["white","curd","tuna"]},
+    {b:"k",items:["cheese","ham","strog"]},
+    {b:"p",items:["ham","strog","tuna","breast"]},
+    {b:"k",items:["milk","yog"]},
+    {b:"w",items:["veg","tomato","tomcan"]}
+  ];
+  var ROUND={potato:10,veg:10,tomato:10,tomcan:10,milk:10,yog:10,curd:10,white:10};
+  function altsFor(item){
+    var pk=item.prod||prodByName(item.n);
+    if(!pk||!item.g)return [];
+    var out=[],seen={};seen[pk]=1;
+    GROUPS.forEach(function(gr){
+      if(gr.items.indexOf(pk)<0)return;
+      gr.items.forEach(function(a){
+        if(seen[a])return;seen[a]=1;
+        var p=P[a],base=gr.b==="k"?item.k/p[1]:gr.b==="p"?item.p/p[2]:item.g/100;
+        var step=ROUND[a]||5,g=Math.max(step,Math.round(base*100/step)*step),m=g/100;
+        out.push({prod:a,n:p[0],g:g,k:Math.round(p[1]*m),p:r1(p[2]*m),f:r1(p[3]*m),c:r1(p[4]*m),basis:gr.b});
+      });
+    });
+    return out;
+  }
+  function suggHTML(){
+    var alts=altsFor(replacing),lb={k:"столько же калорий",p:"столько же белка",w:"тот же вес"};
+    return '<div class="sugg">'+
+      (alts.length?'<p class="f-sub">Равноценная замена — нажми, чтобы поставить:</p>'+alts.map(function(a,i){
+        return '<button type="button" class="sugg-b" data-alt="'+i+'"><span class="sn">'+esc(a.n.replace(/ \((сухая|сухие)\)/,""))+' <b class="num">'+a.g+' г</b></span><span class="sm num">'+a.k+' ккал · Б '+fmt(a.p)+' · '+lb[a.basis]+'</span></button>'}).join(""):
+        '<p class="f-sub">Готовой замены нет. Можно просто убрать (×) или ввести свой вариант.</p>')+
+      '</div>';
+  }
   function formHTML(m){
     var pv=portion(draft),forcePlan=!isToday();
+    if(replacing&&!draft.manual){
+      return '<form class="addform" novalidate>'+
+        '<p class="f-title">Замена: <b>'+esc(replacing.n)+'</b> <span class="muted">('+esc(replacing.a)+', '+replacing.k+' ккал)</span></p>'+
+        suggHTML()+
+        (forcePlan?'':'<label class="f-keep"><input type="checkbox" id="af-keep"'+(draft.keep?' checked':'')+'> Сохранить в план'+(m.batch&&m.batch.days.length>1?' на оба дня готовки':' на этот день недели')+'</label>')+
+        '<div class="f-act"><button type="button" class="btn" data-manual>Свой вариант</button><button type="button" class="btn" data-cancel>Отмена</button></div>'+
+      '</form>';
+    }
     return '<form class="addform" novalidate>'+
       (replacing?'<p class="f-title">Замена: <b>'+esc(replacing.n)+'</b> <span class="muted">('+esc(replacing.a)+', '+replacing.k+' ккал)</span></p>':'')+
       '<div class="f-name"><label for="af-n">'+(replacing?'Чем заменить':'Блюдо или продукт')+'</label><input id="af-n" list="foodList" autocomplete="off" placeholder="Например, творог 2%" value="'+esc(draft.n)+'"></div>'+
@@ -617,7 +668,28 @@ html{scroll-behavior:smooth}
     openFor=m.id;replacing=item||null;draft=emptyDraft();draft.keep=!!item;formErr="";render();
     var n=document.getElementById("af-n");if(n)n.focus();
   }
+  function commit(m,it){
+    if(replacing)removeItem(m,replacing);
+    if(draft.keep||!isToday()){
+      var k=m.scope+":"+m.id;(plan.added[k]=plan.added[k]||[]).push({n:it.n,a:fmt(it.g)+" г",g:it.g,k:it.k,p:it.p,f:it.f,c:it.c,prod:it.prod||prodByName(it.n)});
+      savePlan();
+    }else{
+      (st.extras[m.id]=st.extras[m.id]||[]).push({n:it.n,g:it.g,k:it.k,p:it.p,f:it.f,c:it.c});
+      save();
+    }
+    openFor=null;replacing=null;render();
+  }
   function wireForm(form,m){
+    var keep0=form.querySelector("#af-keep");
+    if(keep0)keep0.addEventListener("change",function(e){draft.keep=e.target.checked});
+    form.querySelector("[data-cancel]").onclick=function(){openFor=null;replacing=null;formErr="";render()};
+    var man=form.querySelector("[data-manual]");
+    if(man){
+      var alts=altsFor(replacing);
+      form.querySelectorAll("[data-alt]").forEach(function(b){b.onclick=function(){commit(m,alts[+b.dataset.alt])}});
+      man.onclick=function(){draft.manual=true;render();var n=document.getElementById("af-n");if(n)n.focus()};
+      return;
+    }
     var prev=form.querySelector("#af-prev");
     function upd(){var pv=portion(draft);prev.innerHTML=pv?'= <b>'+pv.k+' ккал</b> · Б '+fmt(pv.p)+' · Ж '+fmt(pv.f)+' · У '+fmt(pv.c):'Введи вес и БЖУ'}
     ["n","g","k","p","f","c"].forEach(function(key){
@@ -629,9 +701,6 @@ html{scroll-behavior:smooth}
         upd();
       });
     });
-    var keep=form.querySelector("#af-keep");
-    if(keep)keep.addEventListener("change",function(e){draft.keep=e.target.checked});
-    form.querySelector("[data-cancel]").onclick=function(){openFor=null;replacing=null;formErr="";render()};
     form.addEventListener("submit",function(e){
       e.preventDefault();
       var name=draft.n.trim(),pv=portion(draft);
@@ -645,16 +714,7 @@ html{scroll-behavior:smooth}
       var per=[numOf(draft.k),numOf(draft.p)||0,numOf(draft.f)||0,numOf(draft.c)||0];
       if(per[0]===null)per[0]=r1(per[1]*4+per[2]*9+per[3]*4);
       foods[name]=per;store.set("sushka-foods",foods);renderLib();
-      var g=numOf(draft.g);
-      if(replacing)removeItem(m,replacing);
-      if(draft.keep||!isToday()){
-        var k=m.scope+":"+m.id;(plan.added[k]=plan.added[k]||[]).push({n:name,a:fmt(g)+" г",g:g,k:pv.k,p:pv.p,f:pv.f,c:pv.c});
-        savePlan();
-      }else{
-        (st.extras[m.id]=st.extras[m.id]||[]).push({n:name,g:g,k:pv.k,p:pv.p,f:pv.f,c:pv.c});
-        save();
-      }
-      openFor=null;replacing=null;render();
+      commit(m,{n:name,g:numOf(draft.g),k:pv.k,p:pv.p,f:pv.f,c:pv.c});
     });
   }
   document.getElementById("dRest").onclick=function(){if(isToday()){st.mode="rest";save()}else otherMode="rest";render()};

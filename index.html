@@ -136,6 +136,15 @@ section{display:flex;flex-direction:column;gap:14px;scroll-margin-top:64px}
 .nrow .np{font-family:var(--mono);font-weight:700;text-align:right}
 .nrow.over .np{color:var(--prot)}
 .nsub{font-size:12px;color:var(--muted)}
+.tag.bad{background:var(--prot);color:var(--surface)}
+.pc-h{margin-top:4px}
+.crit{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:10px 14px}
+.crit summary{cursor:pointer;font-size:14px;font-weight:600;color:var(--accent)}
+.crit ul{list-style:none;margin:10px 0 8px;padding:0;display:flex;flex-direction:column;gap:8px;font-size:14px}
+.crit li .tag{margin-right:4px}
+.label-list .myrow b .chip{margin-left:4px}
+.myrow .mv{display:flex;flex-wrap:wrap;gap:6px 10px;align-items:center}
+.myrow select{font:500 13px var(--sans);color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:3px 6px}
 .note{background:var(--accent-soft);border-radius:12px;padding:12px 14px;font-size:14px}
 .note.warm{background:var(--prot-soft)}
 
@@ -292,23 +301,42 @@ html{scroll-behavior:smooth}
 
 <section id="snacks">
   <h2>Твои продукты</h2>
-  <div class="label-list">
-    <div><b>Тунец Дикое море <span class="tag">отлично</span></b><span>104 ккал, 23 г белка на 100 г, почти без жира. Лучший быстрый белок из того, что есть. Проверь вес банки: в меню заложено 185 г.</span></div>
-    <div><b>Томаты кубиками <span class="tag">отлично</span></b><span>22 ккал на 100 г. Основа соуса для макарон и тушёных бёдер. Открытую банку сразу переложи в стекло: в жестянке хранить не больше 12 часов.</span></div>
-    <div><b>Лаваш армянский <span class="tag">подходит</span></b><span>262 ккал на 100 г, почти без жира. Считай по весу, а не по штукам: взвесь одну лепёшку и запомни.</span></div>
-    <div><b>Сыр лёгкий <span class="tag">подходит</span></b><span>265 ккал и 15 г жира на 100 г. Нормально в омлет и тосты по 20–30 г. Кусками «к чаю» — уже нет.</span></div>
-    <div><b>Молоко 2,5% <span class="tag">подходит</span></b><span>55 ккал на 100 мл. В каше и кофе. Стакан к еде — +110 ккал.</span></div>
-    <div><b>Хлеб для тостов <span class="tag opt">с ограничением</span></b><span>243 ккал на 100 г, из них половина — жир (12 г, сливочное масло и семечки). 1–2 ломтика вместо лаваша, не вместе с ним. Хранится 4 дня.</span></div>
-    <div><b>Строганина куриная <span class="tag opt">с ограничением</span></b><span>190 ккал, 24 г белка, но много соли, нитрит и глутамат. Как закуска до 40 г, 2 раза в неделю. От соли вес утром может прыгнуть на 0,5 кг водой.</span></div>
-    <div><b>Творожники <span class="tag">отлично</span></b><span>Твой рецепт стал завтраком во вторник и пятницу: 200 г творога, 50 г ветчины, 20 г сыра, 20 г рисовой муки, 1 яйцо — около 480 ккал и 58 г белка, плюс 2 киви. В день тренировки киви уходят в перекус перед залом.</span></div>
-    <div><b>Киви <span class="tag">отлично</span></b><span>~35 ккал за штуку, много витамина C. Замена банану: 3 киви ≈ 1 банан по калориям. Хорошо к творогу и йогурту.</span></div>
-    <div><b>Мука рисовая <span class="tag">подходит</span></b><span>366 ккал на 100 г. В творожники 20 г (ложка с горкой) — больше не нужно, творог и яйцо держат форму.</span></div>
-    <div><b>Морковь по-корейски <span class="tag opt">с ограничением</span></b><span>119 ккал на 100 г, из них 73 — масло. Это не «овощи без счёта», а заправка: 40 г вместо ложки масла в салате (в заменах к маслу она есть).</span></div>
-    <div><b>Сок J7 апельсиновый <span class="tag warn">не для сушки</span></b><span>Стакан 250 мл ≈ 110 ккал сахара, которые не насыщают. Лучше съесть 2 киви. Если очень хочется — 200 мл перед тренировкой вместо банана, в остальные дни не пить.</span></div>
-    <div><b>Фасоль печёная <span class="tag warn">доесть и не покупать</span></b><span>220 ккал на 100 г, с сахаром и маслом. Белка меньше, чем обещает банка. Открытую банку съешь за 2 дня как гарнир по 100 г вместо крупы (в меню её нет). Если хочется фасоли — бери обычную в собственном соку.</span></div>
+  <details class="crit"><summary>Как продукты попадают в группы</summary>
+    <ul>
+      <li><span class="tag">Подходит</span> белок от 25% калорий при жирах до 40% (мясо, рыба, творог, яйца) · или жиры до 15% калорий (крупы, лаваш, овощи, фрукты) · или до 100 ккал на 100 г (молоко, кефир). Можно каждый день в граммовках меню.</li>
+      <li><span class="tag opt">С ограничением</span> всё, что жирнее или с солью и добавками: сыры, колбасы, хлеб на масле, заправки. Только отмеренная порция, не каждый день.</li>
+      <li><span class="tag warn">Доесть и не покупать</span> уже куплено, но с сахаром или маслом в составе. Доесть в пределах калорий дня и больше не брать. Ставится только вручную.</li>
+      <li><span class="tag bad">Вредит фигуре</span> от 400 ккал на 100 г при белке меньше 15% калорий (сладкое, выпечка, чипсы) · а также сок, сладкая газировка, алкоголь — жидкие калории не насыщают.</li>
+    </ul>
+    <p class="muted" style="font-size:13px">Новые продукты, которые ты вносишь с БЖУ, попадают сюда с пометкой «мой», группа ставится по этим правилам. Сахар по БЖУ не виден — соки и сладкое переставь вручную.</p>
+  </details>
+  <h3 class="pc-h"><span class="tag">Подходит</span></h3>
+  <div class="label-list" id="pc-fit">
+    <div><b>Тунец Дикое море</b><span>104 ккал, 23 г белка на 100 г, почти без жира. Лучший быстрый белок из того, что есть. Проверь вес банки: в меню заложено 185 г.</span></div>
+    <div><b>Творожники</b><span>Твой рецепт стал завтраком во вторник и пятницу: 200 г творога, 50 г ветчины, 20 г сыра, 20 г рисовой муки, 1 яйцо — около 480 ккал и 58 г белка, плюс 2 киви. В день тренировки киви уходят в перекус перед залом.</span></div>
+    <div><b>Томаты кубиками</b><span>22 ккал на 100 г. Основа соуса для макарон и тушёных бёдер. Открытую банку сразу переложи в стекло: в жестянке хранить не больше 12 часов.</span></div>
+    <div><b>Лаваш армянский</b><span>262 ккал на 100 г, почти без жира. Считай по весу, а не по штукам: взвесь одну лепёшку и запомни.</span></div>
+    <div><b>Молоко 2,5%</b><span>55 ккал на 100 мл. В каше и кофе. Стакан к еде — +110 ккал.</span></div>
+    <div><b>Киви</b><span>~35 ккал за штуку, много витамина C. Замена банану: 3 киви ≈ 1 банан по калориям. Хорошо к творогу и йогурту.</span></div>
+    <div><b>Мука рисовая</b><span>366 ккал на 100 г. В творожники 20 г (ложка с горкой) — больше не нужно, творог и яйцо держат форму.</span></div>
+    <div><b>Огурцы, помидоры, капуста, зелень</b><span>Можно без счёта. Кофе и чай без сахара, газировка на сахарозаменителе.</span></div>
+  </div>
+  <h3 class="pc-h"><span class="tag opt">С ограничением</span></h3>
+  <div class="label-list" id="pc-limit">
+    <div><b>Сыр лёгкий</b><span>265 ккал и 15 г жира на 100 г. Нормально в омлет и тосты по 20–30 г. Кусками «к чаю» — уже нет.</span></div>
     <div><b>Ветчина куриная</b><span>128 ккал на 100 г, белка вдвое меньше, чем в грудке. Только для ролла, 60 г.</span></div>
-    <div><b>Без ограничений</b><span>Огурцы, помидоры, капуста, зелень, кофе и чай без сахара, газировка на сахарозаменителе.</span></div>
-    <div><b>Ломает дефицит</b><span>Масло «на глаз», соусы, орехи горстями, сок, алкоголь (0,5 л пива ≈ 220 ккал), еда «на пробу».</span></div>
+    <div><b>Хлеб для тостов</b><span>243 ккал на 100 г, из них половина — жир (12 г, сливочное масло и семечки). 1–2 ломтика вместо лаваша, не вместе с ним. Хранится 4 дня.</span></div>
+    <div><b>Строганина куриная</b><span>190 ккал, 24 г белка, но много соли, нитрит и глутамат. Как закуска до 40 г, 2 раза в неделю. От соли вес утром может прыгнуть на 0,5 кг водой.</span></div>
+    <div><b>Морковь по-корейски</b><span>119 ккал на 100 г, из них 73 — масло. Это не «овощи без счёта», а заправка: 40 г вместо ложки масла в салате (в заменах к маслу она есть).</span></div>
+  </div>
+  <h3 class="pc-h"><span class="tag warn">Доесть и не покупать</span></h3>
+  <div class="label-list" id="pc-finish">
+    <div><b>Фасоль печёная</b><span>220 ккал на 100 г, с сахаром и маслом. Белка меньше, чем обещает банка. Открытую банку съешь за 2 дня как гарнир по 100 г вместо крупы (в меню её нет). Если хочется фасоли — бери обычную в собственном соку.</span></div>
+  </div>
+  <h3 class="pc-h"><span class="tag bad">Вредит фигуре</span></h3>
+  <div class="label-list" id="pc-harm">
+    <div><b>Сок J7 апельсиновый</b><span>Стакан 250 мл ≈ 110 ккал сахара, которые не насыщают. Лучше съесть 2 киви. Если очень хочется — 200 мл перед тренировкой вместо банана, в остальные дни не пить.</span></div>
+    <div><b>Масло «на глаз», соусы, алкоголь</b><span>Масло «на глаз», соусы, орехи горстями, сок, алкоголь (0,5 л пива ≈ 220 ккал), еда «на пробу».</span></div>
   </div>
   <h3 style="margin-top:6px">Стоит добавить в рацион</h3>
   <p class="muted" style="font-size:13px">Всё уже есть в поиске по продуктам и в готовых заменах (⇄).</p>
@@ -573,7 +601,29 @@ html{scroll-behavior:smooth}
   var foods=store.get("sushka-foods")||{};
   function lib(){var o={};for(var k in P)o[P[k][0]]=P[k].slice(1,5);for(var k2 in foods)o[k2]=foods[k2];return o}
   var dl=document.getElementById("foodList");
-  function renderLib(){var L=lib();dl.innerHTML=Object.keys(L).sort().map(function(n){return '<option value="'+esc(n)+'"></option>'}).join("")}
+  var CATS={fit:"Подходит",limit:"С ограничением",finish:"Доесть и не покупать",harm:"Вредит фигуре"};
+  function autoCat(v){ // v = [kcal, protein, fat, carbs] per 100 g
+    var k=v[0]||(v[1]*4+v[2]*9+v[3]*4);if(!k)return "fit";
+    var ps=v[1]*4/k, fs=v[2]*9/k;
+    if(k>=400&&ps<0.15)return "harm";
+    if((ps>=0.25&&fs<=0.4)||fs<=0.15||(k<=100&&fs<=0.45))return "fit";
+    return "limit";
+  }
+  var foodCat=store.get("sushka-foodcat")||{};
+  function renderMyFoods(){
+    document.querySelectorAll(".myrow").forEach(function(r){r.remove()});
+    Object.keys(foods).filter(function(n){return !prodByName(n)}).sort().forEach(function(n){
+      var v=foods[n],cat=foodCat[n]||autoCat(v),list=document.getElementById("pc-"+cat);if(!list)return;
+      var d=document.createElement("div");d.className="myrow";
+      d.innerHTML='<b>'+esc(n)+' <span class="chip">мой</span></b><span class="mv"><span class="num">'+Math.round(v[0])+' ккал · Б '+fmt(v[1])+' · Ж '+fmt(v[2])+' · У '+fmt(v[3])+' на 100 г</span>'+
+        '<select aria-label="Группа для '+esc(n)+'">'+Object.keys(CATS).map(function(c){return '<option value="'+c+'"'+(c===cat?' selected':'')+'>'+CATS[c]+(c===autoCat(v)?' (по БЖУ)':'')+'</option>'}).join("")+'</select>'+
+        '<button type="button" class="ib" aria-label="Удалить '+esc(n)+' из моих продуктов">×</button></span>';
+      d.querySelector("select").onchange=function(e){foodCat[n]=e.target.value;store.set("sushka-foodcat",foodCat);renderMyFoods()};
+      d.querySelector("button").onclick=function(){delete foods[n];delete foodCat[n];store.set("sushka-foods",foods);store.set("sushka-foodcat",foodCat);renderLib()};
+      list.insertBefore(d,list.firstChild);
+    });
+  }
+  function renderLib(){renderMyFoods();var L=lib();dl.innerHTML=Object.keys(L).sort().map(function(n){return '<option value="'+esc(n)+'"></option>'}).join("")}
 
   // ---------- cooking lists ----------
   function cookList(c){

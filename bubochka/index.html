@@ -145,6 +145,18 @@ section{display:flex;flex-direction:column;gap:14px;scroll-margin-top:64px}
 .label-list .myrow b .chip{margin-left:4px}
 .myrow .mv{display:flex;flex-wrap:wrap;gap:6px 10px;align-items:center}
 .myrow select{font:500 13px var(--sans);color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:3px 6px}
+.supp .info{cursor:pointer}
+.supp .info:hover,.supp .info:focus-visible{border-color:var(--accent);outline:none}
+.supp .more{font-size:13px;font-weight:600;color:var(--accent)}
+#infoDlg{border:0;padding:0;border-radius:16px;background:var(--surface);color:var(--ink);width:min(560px,calc(100vw - 32px));max-height:min(80vh,720px)}
+#infoDlg::backdrop{background:rgba(0,0,0,.45)}
+.dlg{padding:16px 18px 20px;display:flex;flex-direction:column;gap:10px}
+.dlg-h{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;position:sticky;top:0;background:var(--surface);padding-bottom:4px}
+.dlg-x{width:30px;height:30px;font-size:16px}
+#infoBody{display:flex;flex-direction:column;gap:8px;font-size:14px}
+#infoBody h3{margin-top:6px}
+.dlg-lead{font-size:15px}
+.tl{margin:0;padding-left:18px;display:flex;flex-direction:column;gap:6px}
 .note{background:var(--accent-soft);border-radius:12px;padding:12px 14px;font-size:14px}
 .note.warm{background:var(--prot-soft)}
 
@@ -422,8 +434,8 @@ html{scroll-behavior:smooth}
   </ol>
   <h2 style="margin-top:10px">Добавки</h2>
   <div class="supp">
-    <div><span class="tag">Нужен</span><h3>Креатин моногидрат</h3><p>3 г каждый день, время неважно. Первую неделю +0,5 кг воды, это нормально.</p></div>
-    <div><span class="tag">Октябрь–март</span><h3>Витамин D3</h3><p>2000 МЕ в день с едой.</p></div>
+    <div class="info" role="button" tabindex="0" data-info="creatine"><span class="tag">Нужен</span><h3>Креатин моногидрат</h3><p>3 г каждый день, время неважно. Первую неделю +0,5 кг воды, это нормально.</p><span class="more">Подробнее ›</span></div>
+    <div class="info" role="button" tabindex="0" data-info="d3"><span class="tag">Октябрь–март</span><h3>Витамин D3</h3><p>2000 МЕ в день с едой.</p><span class="more">Подробнее ›</span></div>
     <div><span class="tag opt">Если нужно</span><h3>Омега-3</h3><p>1 г EPA+DHA, если рыба реже двух раз в неделю.</p></div>
     <div><span class="tag opt">По анализу</span><h3>Железо</h3><p>Только если низкий ферритин. Не пить «на всякий случай».</p></div>
     <div><span class="tag opt">Можно</span><h3>Кофеин</h3><p>До 100–150 мг за 30–40 минут до зала. Кофе подойдёт.</p></div>
@@ -431,6 +443,43 @@ html{scroll-behavior:smooth}
   </div>
 </section>
 
+<dialog id="infoDlg" aria-labelledby="infoTitle">
+  <div class="dlg">
+    <div class="dlg-h"><h2 id="infoTitle"></h2><button type="button" class="ib dlg-x" id="infoClose" aria-label="Закрыть">×</button></div>
+    <div id="infoBody"></div>
+  </div>
+</dialog>
+<template id="info-creatine">
+  <p class="dlg-lead">Креатин — вещество, которое организм делает сам и получает из мяса и рыбы. В мышцах он запасается как фосфокреатин — быстрое топливо для коротких тяжёлых усилий: подход в 6–10 повторов держится именно на нём.</p>
+  <h3>Зачем на сушке</h3>
+  <p>На дефиците сила падает первой. Креатин помогает держать рабочие веса, а сохранённые веса — главный сигнал телу не сжигать мышцы. Это одна из самых изученных добавок в спорте.</p>
+  <h3>Что будет по времени</h3>
+  <ol class="tl">
+    <li><b>1–2 неделя.</b> Мышцы насыщаются креатином. На весах +0,3–1 кг — это вода внутри мышц, не жир и не отёк. Сравнивай вес с этой поправкой.</li>
+    <li><b>3–4 неделя.</b> Запас мышц полный. Обычно +1–2 повтора в подходе или шаг веса сверху в жиме и приседе.</li>
+    <li><b>2–3 месяца и дальше.</b> Больше качественной работы на тренировках — лучше сохраняются мышцы на сушке и быстрее растут потом.</li>
+    <li><b>Если бросить.</b> Вода и эффект уходят за 3–4 недели. Привыкания нет, делать перерывы («циклить») не нужно.</li>
+  </ol>
+  <h3>Как принимать</h3>
+  <p>Моногидрат, <span class="cr-dose">3 г</span> в день, каждый день, в любое время, можно с едой. Загрузка по 20 г не нужна. Воду пить как обычно.</p>
+  <h3>Безопасность</h3>
+  <p>Для здоровых почек безопасен. В анализе крови может быть чуть выше креатинин — это ожидаемо, предупреди врача, что принимаешь креатин.</p>
+</template>
+<template id="info-d3">
+  <p class="dlg-lead">Витамин D вырабатывается в коже от солнца. С октября по март солнце в средней полосе России стоит слишком низко, и кожа его почти не делает — поэтому зимой у большинства уровень ниже нормы.</p>
+  <h3>На что влияет</h3>
+  <p>Усвоение кальция и прочность костей, работа мышц, иммунитет. При нехватке — зимняя усталость, частые простуды, сила может проседать. Для тех, кто тренируется, это ещё и защита от стресс-переломов.</p>
+  <h3>Что будет по времени</h3>
+  <ol class="tl">
+    <li><b>Первые недели.</b> Ощутимо — ничего. Это не стимулятор, он работает медленно.</li>
+    <li><b>2–3 месяца.</b> Уровень в крови выходит на ровный. Если был недостаток — может уйти зимняя разбитость, реже болеешь.</li>
+    <li><b>Долго.</b> Кости и мышцы получают то, что им нужно, всю зиму. Это профилактика, а не ускоритель результата.</li>
+  </ol>
+  <h3>Чего он не делает</h3>
+  <p>Не сжигает жир и не поднимает тестостерон, если недостатка нет.</p>
+  <h3>Как принимать</h3>
+  <p>2000 МЕ в день с едой, в которой есть немного жира (он жирорастворимый), с октября по март. Больше 4000 МЕ без анализа не пить. Лучше всего — сдать анализ на 25(OH)D: если недостаток сильный, дозу назначит врач.</p>
+</template>
 <footer>Общий план для здорового человека. Если есть проблемы со здоровьем или лекарства, согласуй его с врачом.</footer>
 </div>
 
@@ -1069,6 +1118,25 @@ html{scroll-behavior:smooth}
   }
   document.getElementById("shopReset").onclick=function(){got={};store.set("sushka-bubochka-shop2",got);renderShop()};
 
+  // ---------- supplement popups ----------
+  (function(){
+    var dlg=document.getElementById("infoDlg");if(!dlg)return;
+    var titles={creatine:"Креатин моногидрат",d3:"Витамин D3"};
+    function show(key){
+      document.getElementById("infoTitle").textContent=titles[key];
+      var body=document.getElementById("infoBody");body.innerHTML="";
+      body.appendChild(document.getElementById("info-"+key).content.cloneNode(true));
+      if(dlg.showModal)dlg.showModal();else dlg.setAttribute("open","");
+      body.scrollTop=0;
+    }
+    function close(){if(dlg.close)dlg.close();else dlg.removeAttribute("open")}
+    document.querySelectorAll("[data-info]").forEach(function(c){
+      c.addEventListener("click",function(){show(c.dataset.info)});
+      c.addEventListener("keydown",function(e){if(e.key==="Enter"||e.key===" "){e.preventDefault();show(c.dataset.info)}});
+    });
+    document.getElementById("infoClose").onclick=close;
+    dlg.addEventListener("click",function(e){if(e.target===dlg)close()});
+  })();
   renderLib();
   render();
 })();

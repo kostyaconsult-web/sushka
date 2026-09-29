@@ -99,6 +99,14 @@ section{display:flex;flex-direction:column;gap:14px;scroll-margin-top:64px}
 .meal ul.plan li{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center}
 .meal ul.plan .xv{flex-wrap:nowrap;white-space:nowrap;gap:4px}
 .meal ul.plan .xv .g{margin-right:4px}
+.gbtn{border:0;background:none;padding:2px 4px;margin-right:2px;font:500 13px var(--mono);color:var(--muted);border-bottom:1px dashed var(--line);border-radius:4px;cursor:pointer;white-space:nowrap}
+.gbtn:hover{color:var(--ink);border-bottom-color:var(--accent)}
+.gbtn.ged{color:var(--accent);font-weight:700}
+.gedit{display:inline-flex;align-items:center;gap:3px;margin-right:2px}
+.gin{width:58px;font:600 14px var(--mono);color:var(--ink);background:var(--bg);border:1px solid var(--accent);border-radius:6px;padding:3px 5px;text-align:right}
+.gin.bad{border-color:var(--prot);outline:2px solid var(--prot)}
+.gu{font-size:12px;color:var(--muted)}
+.ib.ok{color:var(--accent);border-color:var(--accent)}
 .meal.is-done .ib{background:var(--surface)}
 .meal li .nm{min-width:0}
 .chip{font-size:10px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;padding:1px 6px;border-radius:999px;background:var(--accent-soft);color:var(--accent);vertical-align:1px}
@@ -304,7 +312,7 @@ html{scroll-behavior:smooth}
   <div id="cookToday" hidden></div>
   <div class="meals" id="meals"></div>
   <datalist id="foodList"></datalist>
-  <p class="muted" style="font-size:13px">Галочка — съела приём по плану (только сегодня). Тренировки по умолчанию в Пн, Ср и Пт; в субботу или воскресенье включай «Тренировку» сама. ⇄ — заменить продукт, × — убрать. Замены в обеде и ужине действуют на оба дня готовки, в завтраке и перекусах — на этот день недели. «Вернуть исходный план» всё откатит. «Добавить» — еда сверх плана: на сегодня или, с галочкой, в план. Граммы крупы, макарон и мяса — в сухом и сыром виде.</p>
+  <p class="muted" style="font-size:13px">Галочка — съела приём по плану (только сегодня). Тренировки по умолчанию в Пн, Ср и Пт; в субботу или воскресенье включай «Тренировку» сама. Нажми на граммы, чтобы поменять вес. ⇄ — заменить продукт, × — убрать. Замены в обеде и ужине действуют на оба дня готовки, в завтраке и перекусах — на этот день недели. «Вернуть исходный план» всё откатит. «Добавить» — еда сверх плана: на сегодня или, с галочкой, в план. Граммы крупы, макарон и мяса — в сухом и сыром виде.</p>
 </section>
 
 <section id="cook" hidden>
@@ -844,11 +852,17 @@ html{scroll-behavior:smooth}
   function savePlan(){store.set("sushka-bubochka-plan2",plan)}
   function isToday(){return selDay===todayIdx}
   function curMode(){return isToday()?st.mode:otherMode}
+  function withGrams(i,g){
+    var p=P[i.prod],mm=g/100,unit=/мл$/.test(i.a)?" мл":" г";
+    return Object.assign({},i,{g:g,a:fmt(g)+unit,k:Math.round(p[1]*mm),p:r1(p[2]*mm),f:r1(p[3]*mm),c:r1(p[4]*mm),edited:true});
+  }
   function planItems(m){
+    if(!plan.grams)plan.grams={};
     return m.items.filter(function(i){return !plan.removed[m.scope+":"+i.id]})
+      .map(function(i){var g=plan.grams[m.scope+":"+i.id];return g?withGrams(i,g):i})
       .concat((plan.added[m.scope+":"+m.id]||[]).map(function(x,idx){return Object.assign({mine:true,idx:idx},x)}));
   }
-  function isEdited(m){return m.items.some(function(i){return plan.removed[m.scope+":"+i.id]})||(plan.added[m.scope+":"+m.id]||[]).length>0}
+  function isEdited(m){return m.items.some(function(i){return plan.removed[m.scope+":"+i.id]||(plan.grams&&plan.grams[m.scope+":"+i.id])})||(plan.added[m.scope+":"+m.id]||[]).length>0}
 
   // ---------- product library ----------
   var foods=store.get("sushka-bubochka-foods")||{};
@@ -989,16 +1003,21 @@ html{scroll-behavior:smooth}
       '<div class="f-act"><button type="submit" class="btn primary">'+(replacing?'Заменить':'Добавить')+'</button><button type="button" class="btn" data-cancel>Отмена</button></div>'+
     '</form>';
   }
-  function itemRow(i){
-    var ref=i.mine?'data-mine="'+i.idx+'"':'data-item="'+i.id+'"';
+  var editG=null; // "scope:itemId" or "scope:mealId#idx" of the row whose grams are being edited
+  function gKey(i,m){return i.mine?m.scope+":"+m.id+"#"+i.idx:m.scope+":"+i.id}
+  function itemRow(i,m){
+    var ref=i.mine?'data-mine="'+i.idx+'"':'data-item="'+i.id+'"',key=gKey(i,m);
+    var grams=editG===key?
+      '<span class="gedit"><input class="gin" inputmode="decimal" value="'+(i.g||"")+'" aria-label="Граммы: '+esc(i.n)+'"><span class="gu">'+(/мл$/.test(i.a)?"мл":"г")+'</span><button type="button" class="ib ok" data-gok '+ref+' aria-label="Сохранить граммы">✓</button></span>':
+      '<button type="button" class="gbtn'+(i.edited?' ged':'')+'" data-g '+ref+' title="Изменить граммы">'+esc(i.a)+' · '+i.k+'</button>';
     return '<li'+(i.mine?' class="mine"':'')+'><span class="nm">'+esc(i.n)+(i.mine?' <span class="chip">мой</span>':'')+'</span>'+
-      '<span class="xv"><span class="g">'+esc(i.a)+' · '+i.k+'</span>'+
+      '<span class="xv">'+grams+
       '<button type="button" class="ib" data-swap '+ref+' aria-label="Заменить '+esc(i.n)+'" title="Заменить">⇄</button>'+
       '<button type="button" class="ib" data-rm '+ref+' aria-label="Убрать '+esc(i.n)+'" title="Убрать из плана">×</button></span></li>';
   }
   function findItem(m,btn){
     if(btn.dataset.mine!==undefined){var x=(plan.added[m.scope+":"+m.id]||[])[+btn.dataset.mine];return x?Object.assign({mine:true,idx:+btn.dataset.mine},x):null}
-    return m.items.filter(function(i){return i.id===btn.dataset.item})[0]||null;
+    return planItems(m).filter(function(i){return !i.mine&&i.id===btn.dataset.item})[0]||null;
   }
   function removeItem(m,item){
     if(item.mine)plan.added[m.scope+":"+m.id].splice(item.idx,1);else plan.removed[m.scope+":"+item.id]=true;
@@ -1081,7 +1100,7 @@ html{scroll-behavior:smooth}
       d.innerHTML=(tdy?'<input type="checkbox" id="'+id+'"'+(st.done[m.id]?" checked":"")+'><label class="check" for="'+id+'" aria-label="Съел по плану: '+m.name+'">✓</label>':'')+
         '<div class="head"><h3>'+m.name+(m.title?' <span class="ttl">· '+esc(m.title)+'</span>':'')+'</h3><span class="kc">'+Math.round(pt.k)+' ккал · <em>Б '+Math.round(pt.p)+'</em></span></div>'+
         (m.batch&&m.batch.days.length>1?'<p class="batch">приготовлено на '+m.batch.days.map(function(x){return DAYN[x]}).join(" и ")+'</p>':'')+
-        '<ul class="plan">'+(items.length?items.map(itemRow).join(""):'<li class="empty">Всё убрано из плана</li>')+'</ul>'+
+        '<ul class="plan">'+(items.length?items.map(function(i){return itemRow(i,m)}).join(""):'<li class="empty">Всё убрано из плана</li>')+'</ul>'+
         (m.hint?'<p class="hint">'+m.hint+'</p>':"")+
         (isEdited(m)?'<button type="button" class="linkbtn" data-reset>Вернуть исходный план</button>':'')+
         (ex.length?'<div class="extras"><p class="eyebrow">Только сегодня · '+exK+' ккал</p><ul>'+ex.map(function(x,i){
@@ -1092,8 +1111,33 @@ html{scroll-behavior:smooth}
       d.querySelectorAll("[data-del]").forEach(function(b){b.onclick=function(){ex.splice(+b.dataset.del,1);st.extras[m.id]=ex;save();render()}});
       d.querySelectorAll("[data-rm]").forEach(function(b){b.onclick=function(){var it=findItem(m,b);if(it){removeItem(m,it);render()}}});
       d.querySelectorAll("[data-swap]").forEach(function(b){b.onclick=function(){var it=findItem(m,b);if(it)openForm(m,it)}});
+      d.querySelectorAll("[data-g]").forEach(function(b){b.onclick=function(){
+        var it=findItem(m,b);if(!it)return;
+        if(!it.g&&!it.mine){return}
+        editG=gKey(it,m);render();
+        var inp=document.querySelector(".gin");if(inp){inp.focus();inp.select()}
+      }});
+      d.querySelectorAll("[data-gok]").forEach(function(b){
+        var inp=b.parentNode.querySelector(".gin");
+        function saveG(){
+          var it=findItem(m,b),v=numOf(inp.value);
+          if(!it||v===null||isNaN(v)||v<=0||v>3000){inp.classList.add("bad");inp.focus();return}
+          v=Math.round(v);
+          if(it.mine){
+            var arr=plan.added[m.scope+":"+m.id],x=arr[it.idx],k0=x.prod&&P[x.prod];
+            if(k0){Object.assign(x,{g:v,a:v+" г",k:Math.round(k0[1]*v/100),p:r1(k0[2]*v/100),f:r1(k0[3]*v/100),c:r1(k0[4]*v/100)})}
+            else{var ratio=v/(x.g||v);Object.assign(x,{g:v,a:v+" г",k:Math.round(x.k*ratio),p:r1(x.p*ratio),f:r1(x.f*ratio),c:r1(x.c*ratio)})}
+          }else{
+            var base=m.items.filter(function(i){return i.id===it.id})[0];
+            if(base&&v===base.g)delete plan.grams[m.scope+":"+it.id];else plan.grams[m.scope+":"+it.id]=v;
+          }
+          savePlan();editG=null;render();
+        }
+        b.onclick=saveG;
+        inp.addEventListener("keydown",function(e){if(e.key==="Enter"){e.preventDefault();saveG()}if(e.key==="Escape"){editG=null;render()}});
+      });
       var rs=d.querySelector("[data-reset]");
-      if(rs)rs.onclick=function(){m.items.forEach(function(i){delete plan.removed[m.scope+":"+i.id]});delete plan.added[m.scope+":"+m.id];savePlan();render()};
+      if(rs)rs.onclick=function(){m.items.forEach(function(i){delete plan.removed[m.scope+":"+i.id];if(plan.grams)delete plan.grams[m.scope+":"+i.id]});delete plan.added[m.scope+":"+m.id];savePlan();render()};
       var ab=d.querySelector("[data-add]");
       if(ab)ab.onclick=function(){openForm(m,null)};
       var form=d.querySelector("form");
